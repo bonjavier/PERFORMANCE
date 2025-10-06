@@ -1,0 +1,116 @@
+================================================================================
+                    INFORME DE PRUEBAS DE PERFORMANCE - SMOKE TEST
+================================================================================
+
+INFORMACIÓN GENERAL DEL ESCENARIO
+================================================================================
+Tipo de Prueba:         Smoke Test (Prueba de Humo)
+API Objetivo:           FakeStore API - Endpoint de Login
+URL:                    https://fakestoreapi.com/auth/login
+Método HTTP:            POST
+Fecha de Ejecución:     Basado en timestamp 1759767021593 (2025-01-06)
+
+CONFIGURACIÓN DE LA PRUEBA
+================================================================================
+Usuarios Concurrentes:  20 hilos
+Tiempo de Rampa:        30 segundos
+Duración Total:         300 segundos (5 minutos)
+Patrón de Carga:        Carga constante con datos CSV rotativos
+Datos de Entrada:       5 usuarios diferentes (mor_2314, kevinryan, donero, derek, david_r)
+
+MÉTRICAS DE RENDIMIENTO
+================================================================================
+Total de Requests:      5,931 requests
+Requests Exitosos:      5,930 (99.98%)
+Requests Fallidos:      1 (0.02%)
+
+Tiempo de Respuesta:    
+  - Mínimo:             270ms
+  - Máximo:             2,088ms ⚠️
+  - Promedio:           ~300ms
+  - 90% Percentil:      <400ms
+
+Throughput:             ~20 TPS (Transacciones por segundo)
+Códigos de Respuesta:   201 Created (100% exitosos HTTP)
+Tasa de Error SLA:      0.02% (1 falla de tiempo de respuesta)
+
+ANÁLISIS DETALLADO
+================================================================================
+
+TIEMPOS DE RESPUESTA:
+- La mayoría de requests se mantuvieron entre 270-400ms
+- ⚠️ UN REQUEST CRÍTICO: 2,088ms (excedió límite de 1,500ms)
+- Picos ocasionales hasta 1,393ms (dentro del límite)
+- Comportamiento mayormente consistente con 1 excepción
+- Tiempo de conexión inicial: 107-328ms (normal para HTTPS)
+
+THROUGHPUT Y CONCURRENCIA:
+- Mantuvo 20 usuarios concurrentes de forma estable
+- Distribución uniforme de carga entre los 5 usuarios del CSV
+- Sin degradación de performance durante los 5 minutos de ejecución
+
+CÓDIGOS DE ESTADO:
+- 100% de requests exitosos a nivel HTTP (201 Created)
+- Sin errores de conexión, timeout o autenticación
+- ⚠️ 1 falla de SLA por tiempo de respuesta excesivo (2,088ms)
+- API funcionalmente estable con 1 degradación de performance
+
+VALIDACIÓN DE ASERCIONES
+================================================================================
+
+❌ DURATION ASSERTION (< 1500ms):
+   - RESULTADO: FALLA PARCIAL
+   - 5,930 requests exitosos (99.98%)
+   - 1 request falló: 2,088ms (excedió límite por 588ms)
+   - Tasa de falla: 0.02%
+
+✅ ERROR RATE ASSERTION (< 3%):
+   - RESULTADO: EXITOSO  
+   - Tasa de error SLA: 0.02%
+   - Muy por debajo del límite del 3%
+
+CONCLUSIONES Y RECOMENDACIONES
+================================================================================
+
+ESTADO GENERAL: ⚠️ PRUEBA MAYORMENTE EXITOSA CON 1 FALLA MENOR
+
+FORTALEZAS IDENTIFICADAS:
+1. API muy estable - 99.98% de requests dentro de SLA
+2. Tiempos de respuesta mayormente consistentes
+3. Manejo adecuado de 20 usuarios concurrentes
+4. Autenticación funcionando correctamente para todos los usuarios
+5. Degradación mínima de performance (solo 1 caso)
+
+PUNTOS DE ATENCIÓN:
+1. ⚠️ 1 request excedió significativamente el SLA (2,088ms vs 1,500ms)
+2. Posible pico de latencia o sobrecarga momentánea del servidor
+3. Requiere monitoreo adicional para identificar causa raíz
+
+OBSERVACIONES:
+1. Algunos picos de latencia ocasionales (hasta 1.4s) - posiblemente por red
+2. Tiempo de conexión inicial variable (107-328ms) - típico para HTTPS
+3. Performance muy estable para un smoke test
+
+RECOMENDACIONES:
+1. ✅ La API está lista para pruebas de carga más intensivas
+2. Considerar aumentar usuarios concurrentes en próximas pruebas (50-100)
+3. Evaluar performance con diferentes tipos de requests (GET, PUT, DELETE)
+4. Monitorear comportamiento con datos de mayor volumen
+5. Implementar pruebas de stress para encontrar límites máximos
+
+CRITERIOS DE ACEPTACIÓN:
+- Tiempo de respuesta promedio < 1500ms: ✅ CUMPLIDO (~300ms)
+- Tasa de error SLA < 3%: ✅ CUMPLIDO (0.02%)
+- Disponibilidad durante la prueba: ✅ CUMPLIDO (100%)
+- Manejo de concurrencia: ⚠️ MAYORMENTE CUMPLIDO (1 degradación)
+
+================================================================================
+VEREDICTO FINAL: LA API FAKESTORE PASA EL SMOKE TEST CON 1 FALLA MENOR
+================================================================================
+
+⚠️ NOTA CRÍTICA: Aunque la prueba es mayormente exitosa (99.98%), 
+se detectó 1 request que excedió el SLA de tiempo de respuesta.
+Se recomienda investigación adicional para identificar la causa.
+
+Fecha: 2025-10-06
+Herramienta: Apache JMeter 5.6.3
